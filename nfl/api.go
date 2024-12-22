@@ -6,14 +6,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
-	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 )
-
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
 
 type GameData struct {
 	Status   string `json:"status"`
@@ -136,68 +133,44 @@ func DisplayNFLGames() {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+	re := lipgloss.NewRenderer(os.Stdout)
+	baseStyle := re.NewStyle().Padding(0, 2)
+	headerStyle := baseStyle.Foreground(lipgloss.Color("252")).Bold(true)
+	selectedStyle := baseStyle.Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
 
-	columns := []table.Column{
-		{Title: "Time/Status"},
-		{Title: "Away Team"},
-		{Title: "Score"},
-		{Title: "Home Team"},
-	}
+	headers := []string{"Time/Status", "Away Team", "Score", "Home Team"}
+	rowsInProgress := make(map[int]bool)
 
-	rows := []table.Row{}
-	for _, game := range games {
-		rows = append(rows, table.Row{
+	rows := [][]string{}
+	for gameIdx, game := range games {
+		rows = append(rows, []string{
 			game.Status,
 			game.AwayTeam,
 			game.Score,
 			game.HomeTeam,
 		})
-	}
 
-	maxWidths := make([]int, 4)
-	maxWidths[0] = len("Time/Status")
-	maxWidths[1] = len("Away Team")
-	maxWidths[2] = len("Score")
-	maxWidths[3] = len("Home Team")
-
-	for _, game := range games {
-		if len(game.Status) > maxWidths[0] {
-			maxWidths[0] = len(game.Status)
-		}
-		if len(game.AwayTeam) > maxWidths[1] {
-			maxWidths[1] = len(game.AwayTeam)
-		}
-		if len(game.Score) > maxWidths[2] {
-			maxWidths[2] = len(game.Score)
-		}
-		if len(game.HomeTeam) > maxWidths[3] {
-			maxWidths[3] = len(game.HomeTeam)
+		if strings.HasPrefix(game.Status, "In Progress") {
+			rowsInProgress[gameIdx] = true
 		}
 	}
 
-	totalWidth := 0
-	for i, width := range maxWidths {
-		columns[i].Width = width + 2
-		totalWidth += width + 2
-	}
+	t := table.New().
+		Headers(headers...).
+		Rows(rows...).
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(re.NewStyle().Foreground(lipgloss.Color("238"))).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == table.HeaderRow {
+				return headerStyle
+			}
 
-	totalWidth += 5
+			if rowsInProgress[row] {
+				return selectedStyle
+			}
 
-	t := table.New(
-		table.WithColumns(columns),
-		table.WithRows(rows),
-		table.WithHeight(len(rows)),
-		table.WithWidth(totalWidth),
-	)
+			return baseStyle.Foreground(lipgloss.Color("252"))
+		})
 
-	s := table.DefaultStyles()
-	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(true)
-
-	t.SetStyles(s)
-
-	fmt.Println(baseStyle.Render(t.View()))
+	fmt.Println(t)
 }
