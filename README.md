@@ -2,6 +2,12 @@
 
 A simple CLI tool for checking the scores of your favorite sport leagues. Currently only the NFL is supported but I'll be adding more providers in the future. Feel free to contribute!
 
+## Installation
+
+**Homebrew**:
+`brew tap ChaseRensberger/tap`
+`brew install check-the-score`
+
 ## Usage
 
 Once installed, simply run:
