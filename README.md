@@ -16,6 +16,6 @@ Once installed, simply run:
 
 `check-the-score {provider_name}`
 
-Example Output of `check-the-score nfl`:
+Example output of `check-the-score nfl`:
 
 ![check-the-score example](https://github.com/user-attachments/assets/27f2fd66-8f98-4cd6-96b5-3f30184e7a14)
