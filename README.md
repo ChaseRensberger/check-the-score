@@ -5,7 +5,9 @@ A simple CLI tool for checking the scores of your favorite sport leagues. Curren
 ## Installation
 
 **Homebrew**:
+
 `brew tap ChaseRensberger/tap`
+
 `brew install check-the-score`
 
 ## Usage
