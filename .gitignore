@@ -1,2 +1,3 @@
-build.sh
-bin/
+dist/
+
+.DS_Store
